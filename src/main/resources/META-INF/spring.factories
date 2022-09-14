@@ -1,0 +1,1 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.Example.config.AuditLoggerConfig,\com.Example.config.PropertyConfig
