@@ -1,6 +1,8 @@
 package com.common.logging.interceptor;
 
 import java.time.Instant;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,7 +43,7 @@ public class ApiRequestInterceptor extends HandlerInterceptorAdapter{
     private String getClientIp(HttpServletRequest request) {
         String clientXForwardForIp = request.getHeader("x-forwarded-for");
         logger.debug("clientXForwardedForIp :: {}",clientXForwardForIp);
-        if(StringUtils.isEmpty(clientXForwardForIp)) {
+        if(!StringUtils.isEmpty(clientXForwardForIp)) {
             return getIPFromXForwardedHeader(clientXForwardForIp);
         }
         else {
@@ -50,6 +52,23 @@ public class ApiRequestInterceptor extends HandlerInterceptorAdapter{
     }
     
     private String getIPFromXForwardedHeader(String header) {
-        return header.split(" *, *")[0];
+    	String str = "";
+    	try{
+    	 str = getValueByPattern(header, "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}").trim();
+    	}catch(Exception e){
+    		e.printStackTrace();
+    	}
+    	return str;
+    }
+    
+    private String getValueByPattern(String value, String patternStr) {
+    	String returnValue = "";
+    	Pattern pattern = Pattern.compile(patternStr);
+    	Matcher matcher = pattern.matcher(value);
+    	if(matcher.find()) {
+    		returnValue = matcher.group();
+    	}
+		return returnValue;
+    	
     }
 }
