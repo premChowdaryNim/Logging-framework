@@ -14,6 +14,8 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.common.logging.config.PropertyConfig;
 
+import brave.internal.Nullable;
+
 @Component
 public class ApiRequestInterceptor extends HandlerInterceptorAdapter{
 
@@ -39,11 +41,18 @@ public class ApiRequestInterceptor extends HandlerInterceptorAdapter{
         logger.info("LogInterceptor PreHandler(End)");
         return true;
     }
-    
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception{
+    	logger.info("logInterceptor after view is rendered (START)");
+    	long endTime = System.currentTimeMillis();
+    	long startTime=Long.parseLong(request.getAttribute("startTime")+"");
+    	logger.info("Total time taken to process request {} in milli seconds is {}",request .getRequestURI(),(endTime-startTime));
+    	logger.info("LogInterceptor after view is rendered (END)");
+    }
     private String getClientIp(HttpServletRequest request) {
         String clientXForwardForIp = request.getHeader("x-forwarded-for");
         logger.debug("clientXForwardedForIp :: {}",clientXForwardForIp);
-        if(!StringUtils.isEmpty(clientXForwardForIp)) {
+        if(StringUtils.isEmpty(clientXForwardForIp)) {
             return getIPFromXForwardedHeader(clientXForwardForIp);
         }
         else {
